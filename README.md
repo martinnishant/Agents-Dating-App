@@ -1,61 +1,65 @@
 # Morrow — Agent Matching Studio
 
-A small full-stack prototype using a **fictional 25-person cohort**. It includes a responsive website and a Python API for profile persistence, match ranking, and simulated agent dates.
+**Live demo:** [https://morrow-showcase.onrender.com](https://morrow-showcase.onrender.com)  
+**API health:** [https://morrow-showcase.onrender.com/api/health](https://morrow-showcase.onrender.com/api/health)
+
+Morrow is a full-stack prototype for a fictional, consent-first agent-matching demo. It has a responsive browser UI and a Python API that calculates explainable match rankings and template-generated agent dates for a 25-person synthetic cohort.
+
+## Try the live demo
+
+1. Open the live demo above.
+2. Open a sample profile to inspect its fictional interests, stated intention, values, and evidence notes.
+3. Select **Agent dates** and run the simulated conversations.
+4. Select **Rankings** to compare each person’s best matches and the reasons for each score.
+5. If the cohort count is not 25, choose **Reload showcase data**.
+
+The live backend is configured read-only. Any edits made in the public demo are saved only in that visitor’s browser.
 
 ## Run locally
 
-Requires Python 3.10+; no third-party packages are needed.
+Requires Python 3.10+; no third-party packages are required.
 
 ```bash
-python server.py
+python3 server.py
 ```
 
-Open http://localhost:4173. The Python process serves the website and API from one origin.
+Open http://localhost:4173. The Python server serves both the website and API from one origin. Check the API at http://localhost:4173/api/health.
 
 ## Backend API
 
-Implemented in `server.py` using Python's standard library:
+Implemented in `server.py` using Python’s standard library:
 
-- `GET /api/health` — health check.
-- `GET /api/people` — read the seeded cohort.
-- `PUT /api/people` — save profile changes to `data/people.json` (local mode only).
-- `POST /api/analyze` — compute ranked matches and simulated agent-date dialogue.
-
-The app calls the Python API when available. If opened on a static host such as GitHub Pages, it uses browser localStorage and its JavaScript fallback instead.
+- `GET /api/health` — service health check.
+- `GET /api/people` — load the synthetic cohort.
+- `PUT /api/people` — save profile changes in local mode; disabled on the public Render deployment.
+- `POST /api/analyze` — calculate rankings, match reasons, and simulated agent-date dialogue.
 
 ## Matching algorithm
 
-A transparent weighted heuristic, implemented server-side in Python:
+A transparent weighted heuristic, calculated server-side in Python:
 
 - Shared interests: **40%** (Jaccard overlap of entered interest tags)
 - Similar explicitly stated relationship intention: **30%**
 - Shared stated values: **20%** (Jaccard overlap)
 - Same city: **10%**
 
-The API returns scores, per-person ranked shortlists, human-readable reasons, and a template-generated conversation for each unique top pairing. The dialogue is fictional template output—not an LLM, not an actual conversation, and not a prediction of real-world chemistry.
+The API returns scores, a ranked shortlist for every profile, human-readable reasons, and a template-generated conversation for each unique top pairing. Dialogue is fictional template output—not an LLM, an actual conversation, or a prediction of real-world chemistry.
 
-## Deploy the full-stack demo
+## Deployment
 
-A Render Blueprint is included in `render.yaml`:
+The repository includes a Render Blueprint in `render.yaml`. The live demo is deployed from the public GitHub repository `martinnishant/Agents-Dating-App`. Render runs the Python service with `MORROW_READ_ONLY=1` so public visitors cannot overwrite the shared seed data.
 
-1. Push the project files to a public GitHub repository.
-2. In Render, create a new **Blueprint** and connect that repository.
-3. Deploy the `morrow-showcase` service described by `render.yaml`.
+## Data and limitations
 
-The public service is configured read-only (`MORROW_READ_ONLY=1`): profile edits stay in each visitor's browser, while the backend serves the synthetic seed data and calculates analysis. This avoids an unauthenticated public write endpoint. The in-app local preview can save to the JSON file.
+- All 25 demo personas and source excerpts are synthetic. They are not real people and do not represent scraped social profiles.
+- The app does not scrape LinkedIn or Instagram, call Apify or an external LLM, bypass access controls, or send messages.
+- The project is a demonstration, not a production dating service. Using real participants would require appropriate consent, secure authentication, access controls, and a compliant data-retention process.
 
-## Data & limitations
+## Project files
 
-- All 25 demo profiles and source excerpts are synthetic; no real people or social profiles are represented.
-- No LinkedIn/Instagram scraping, Apify calls, external LLM, or outbound messages are included.
-- `data/people.json` is fictional sample data, committed so the hosted backend starts with a cohort.
-- This is a demo design, not a production dating service. Before using real participants, obtain appropriate consent and add authentication, a database, access controls, data-retention handling, and a compliant data-collection process.
-
-## Files
-
-- `index.html` — frontend.
-- `server.py` — Python backend and match engine.
+- `index.html` — browser UI.
+- `server.py` — Python API and match engine.
 - `data/people.json` — fictional seed data.
-- `render.yaml` — full-stack deployment configuration.
+- `render.yaml` — Render deployment configuration.
 - `requirements.txt` — no external Python packages required.
 - `morrow-template.csv` — profile CSV template.
