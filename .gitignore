@@ -1,0 +1,4 @@
+__pycache__/
+data/people.json
+data/people.tmp
+.env
